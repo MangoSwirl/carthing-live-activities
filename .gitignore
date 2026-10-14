@@ -1,0 +1,10 @@
+node_modules
+dist
+site
+.dev-extension
+.DS_Store
+*.log
+.env*
+
+# real activity archives used to test the decoder; they hold personal data
+tools/fixtures/

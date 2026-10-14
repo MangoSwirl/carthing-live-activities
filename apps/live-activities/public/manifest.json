@@ -1,0 +1,37 @@
+{
+  "id": "01a138a4-aa9f-7782-a3f7-afd8d8315156",
+  "name": "Live Activities",
+  "version": "1.0.0",
+  "description": "Your iPhone's Live Activities on the Car Thing, mirrored from your Mac and redrawn natively. Needs a Mac on macOS 26 with iPhone Live Activities turned on, and Full Disk Access for the bridgething desktop app.",
+  "icon": "icon.svg",
+  "settings": "settings.html",
+  "config": [
+    {
+      "type": "boolean",
+      "data": {
+        "key": "auto_open",
+        "label": "Open automatically",
+        "description": "Bring Live Activities to the front when a new activity starts, and go back to the previous app when the last one ends.",
+        "default": true
+      }
+    }
+  ],
+  "permissions": [],
+  "art": {
+    "heroPx": 248,
+    "thumbPx": 96
+  },
+  "extension": {
+    "entry": "extension/desktop.mjs",
+    "permissions": [
+      "read:~/Library/Group Containers/group.com.apple.liveactivitiesd",
+      "read:~/Library/Group Containers/group.com.apple.chronod/chronod/remoteArchives",
+      "read:/System/Library/Fonts",
+      "read:/Library/Fonts",
+      "net",
+      "sys:networkInterfaces",
+      "sys:homedir"
+    ],
+    "api": 1
+  }
+}
