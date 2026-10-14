@@ -2,7 +2,7 @@
   "id": "01a138a4-aa9f-7782-a3f7-afd8d8315156",
   "name": "Live Activities",
   "version": "1.0.0",
-  "description": "Your iPhone's Live Activities on the Car Thing, mirrored from your Mac and redrawn natively. Needs a Mac on macOS 26 with iPhone Live Activities turned on, and Full Disk Access for the bridgething desktop app.",
+  "description": "Your iPhone's Live Activities on the Car Thing, mirrored from your Mac and redrawn natively. The Car Thing must be plugged into a Mac on macOS 26 with a USB data cable, and the bridgething desktop app needs Full Disk Access.",
   "icon": "icon.svg",
   "settings": "settings.html",
   "config": [

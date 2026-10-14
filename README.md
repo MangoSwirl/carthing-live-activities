@@ -15,6 +15,8 @@ data macOS receives and sends it to the Car Thing. Nothing is screenshotted or O
 
 ## Requirements
 
+- **The Car Thing plugged into your Mac with a USB data cable.** The Car Thing has no Wi-Fi; the Mac reaches it only
+  over that cable, so a charge-only cable or a car charger will not work. This is a desk setup, not one for the car.
 - A Mac on macOS 26 or later, signed in to the same Apple Account as your iPhone, with iPhone Live Activities showing in
   the menu bar (System Settings > Control Center > Live Activities).
 - The bridgething desktop app on that Mac, with the Car Thing connected to it.
@@ -56,7 +58,7 @@ same message. The checks run every 10 seconds, so fixes take effect without rein
 | iPhone Live Activities are off on this Mac | Search System Settings for "Live Activities" and turn on Live Activities from iPhone. |
 | No iPhone is connected to this Mac | Sign in to the same Apple Account on both, iPhone on iOS 26, Bluetooth and Wi-Fi on. |
 | Waiting for a first Live Activity | Start one on the iPhone; once it shows in the Mac menu bar it shows here. |
-| needs the bridgething desktop app on a Mac ... | The Car Thing hears nothing from a Mac: open the desktop app, check this app is installed and enabled there. |
+| Connect your Mac | The Car Thing hears nothing from a Mac: plug it into the Mac with a USB data cable, open the desktop app, and check this app is installed and enabled there. |
 
 ## How it works
 

@@ -248,6 +248,25 @@ function usePresence(activities: Activity[]): Row[] {
   return rows;
 }
 
+function Steps({ title, detail, steps }: { title: string; detail: string; steps: string[] }) {
+  return (
+    <div className="flex max-w-[600px] flex-col gap-4 px-8">
+      <div className="font-display text-screen-title leading-tight font-medium">{title}</div>
+      <div className="text-row text-soft">{detail}</div>
+      <ol className="flex flex-col gap-2">
+        {steps.map((step, i) => (
+          <li key={i} className="flex gap-3 text-row text-near">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-neutral-soft font-mono text-hint">
+              {i + 1}
+            </span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 export default function App() {
   const client = useMemo(() => new BridgethingClient({ url: daemonUrl() }), []);
   const [conn, setConn] = useState<ConnectionState>(client.connectionState);
@@ -410,29 +429,22 @@ export default function App() {
         style={{ paddingRight: KNOB_INSET }}
         className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-500 ${empty ? 'opacity-100' : 'opacity-0'}`}>
         {linked && problem ? (
-          <div className="flex max-w-[600px] flex-col gap-4 px-8">
-            <div className="font-display text-screen-title leading-tight font-medium">{problem.title}</div>
-            <div className="text-row text-soft">{problem.detail}</div>
-            <ol className="flex flex-col gap-2">
-              {problem.steps.map((step, i) => (
-                <li key={i} className="flex gap-3 text-row text-near">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-neutral-soft font-mono text-hint">
-                    {i + 1}
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <Steps title={problem.title} detail={problem.detail} steps={problem.steps} />
+        ) : conn === 'open' && !linked ? (
+          <Steps
+            title="Connect your Mac"
+            detail="Live Activities come from the bridgething desktop app on a Mac, over USB."
+            steps={[
+              'Plug the Car Thing into the Mac with a USB data cable (a charge-only cable or car charger will not work)',
+              'Open the bridgething desktop app on the Mac (macOS 26 or later)',
+              'Install Live Activities there and give bridgething Full Disk Access',
+            ]}
+          />
         ) : (
           <>
             <div className="font-display text-screen-title font-medium text-soft">No Live Activities</div>
             <div className="max-w-[560px] text-center font-mono text-hint leading-relaxed text-dim">
-              {conn !== 'open'
-                ? conn
-                : linked
-                  ? 'they show up here as soon as your iPhone starts one'
-                  : 'needs the bridgething desktop app on a Mac running macOS 26, with full disk access and this app installed there'}
+              {conn !== 'open' ? conn : 'they show up here as soon as your iPhone starts one'}
             </div>
           </>
         )}
