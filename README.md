@@ -94,7 +94,8 @@ bun run check                                   # typecheck, build, and validate
 bun run render <archive> --tag listItem --png out.png --bg '#000'   # render any archive to svg or png
 ```
 
-The terminal you develop from needs Full Disk Access, since the dev loop runs the extension as its child.
+The dev loop runs the extension from your terminal, so the terminal app (Terminal, iTerm, VS Code, ...) needs Full Disk
+Access, not bridgething. Grant it, then quit and reopen that app before running `dev:device`.
 `tools/fixtures/` (gitignored) is where local test archives go; copy them from the `remoteArchives` folder above.
 
 ## Acknowledgements

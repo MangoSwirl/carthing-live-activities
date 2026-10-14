@@ -32,16 +32,30 @@ const problems = {
     detail: `iPhone Live Activities on the Mac arrived in macOS 26 Tahoe; this Mac runs macOS ${darwin + 1}.`,
     steps: ['Update the Mac in System Settings > General > Software Update'],
   }),
-  noFullDiskAccess: (): Problem => ({
-    code: 'no-full-disk-access',
-    title: 'Give bridgething Full Disk Access',
-    detail: 'macOS keeps Live Activities in protected folders that only apps with Full Disk Access can read.',
-    steps: [
-      'On the Mac, open System Settings > Privacy & Security > Full Disk Access',
-      'Turn on bridgething (use + to add it from Applications if it is missing)',
-      'Quit and reopen the bridgething desktop app',
-    ],
-  }),
+  // macOS charges file access to the app that launched the extension: the desktop app once installed, but the
+  // terminal app during `bun run dev`, which runs the extension from the project's .dev-extension folder
+  noFullDiskAccess: (): Problem =>
+    import.meta.url.includes('/.dev-extension/')
+      ? {
+          code: 'no-full-disk-access',
+          title: 'Give your terminal app Full Disk Access',
+          detail: 'The dev loop runs the extension from your terminal, so macOS asks that app for access, not bridgething.',
+          steps: [
+            'Open System Settings > Privacy & Security > Full Disk Access',
+            'Turn on the app you ran bun run dev in (Terminal, iTerm, VS Code, ...)',
+            'Quit that app, reopen it, and start the dev loop again',
+          ],
+        }
+      : {
+          code: 'no-full-disk-access',
+          title: 'Give bridgething Full Disk Access',
+          detail: 'macOS keeps Live Activities in protected folders that only apps with Full Disk Access can read.',
+          steps: [
+            'On the Mac, open System Settings > Privacy & Security > Full Disk Access',
+            'Turn on bridgething (use + to add it from Applications if it is missing)',
+            'Quit and reopen the bridgething desktop app',
+          ],
+        },
   permission: (what: string): Problem => ({
     code: 'permission',
     title: 'Live Activities is missing a permission',
