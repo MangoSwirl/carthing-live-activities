@@ -435,7 +435,7 @@ export default function App() {
             title="Connect your Mac"
             detail="Live Activities come from the bridgething desktop app on a Mac, over USB."
             steps={[
-              'Plug the Car Thing into the Mac with a USB data cable (a charge-only cable or car charger will not work)',
+              'Plug the Car Thing into the Mac over USB (the cable it came with works)',
               'Open the bridgething desktop app on the Mac (macOS 26 or later)',
               'Install Live Activities there and give bridgething Full Disk Access',
             ]}
