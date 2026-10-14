@@ -1,0 +1,60 @@
+{
+  "$schema": "https://apps.bridgething.com/schemas/catalog/v1.json",
+  "schema": "catalog.v1",
+  "updated_at": "2026-10-14T08:21:44.577Z",
+  "repo": {
+    "name": "carthing-live-activities",
+    "description": "Mirror your iPhone's Live Activities onto a BridgeThing Car Thing.",
+    "homepage": "https://github.com/MangoSwirl/carthing-live-activities",
+    "icon": null
+  },
+  "apps": [
+    {
+      "id": "01a138a4-aa9f-7782-a3f7-afd8d8315156",
+      "name": "Live Activities",
+      "description": "Your iPhone's Live Activities on the Car Thing, mirrored from your Mac and redrawn natively. The Car Thing must be plugged into a Mac on macOS 26 over USB, and the bridgething desktop app needs Full Disk Access.",
+      "author": "MangoSwirl",
+      "icon": "https://mangoswirl.github.io/carthing-live-activities/icons/01a138a4-aa9f-7782-a3f7-afd8d8315156.svg",
+      "screenshots": [
+        "https://mangoswirl.github.io/carthing-live-activities/screenshots/01a138a4-aa9f-7782-a3f7-afd8d8315156/1-pair.png",
+        "https://mangoswirl.github.io/carthing-live-activities/screenshots/01a138a4-aa9f-7782-a3f7-afd8d8315156/2-transit.png"
+      ],
+      "homepage": "https://github.com/MangoSwirl/carthing-live-activities",
+      "source": "https://github.com/MangoSwirl/carthing-live-activities",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "released_at": "2026-10-14T08:21:44.566Z",
+          "download": {
+            "url": "https://mangoswirl.github.io/carthing-live-activities/r/01a138a4-aa9f-7782-a3f7-afd8d8315156/1.0.0.zip",
+            "size": 943796,
+            "sha256": "ad5500b4d4de154a238b95824873c5068ecc79795087bbd0d039308401abd3fc"
+          },
+          "settings": {
+            "url": "https://mangoswirl.github.io/carthing-live-activities/s/01a138a4-aa9f-7782-a3f7-afd8d8315156/1.0.0.html",
+            "size": 26933,
+            "sha256": "4e28f4d6d83e8fb0831de0908089bcd5bcb070786fa41f5907827d753d77beb8"
+          },
+          "permissions": [],
+          "extension": {
+            "desktop": true,
+            "permissions": [
+              "read:~/Library/Group Containers/group.com.apple.liveactivitiesd",
+              "read:~/Library/Group Containers/group.com.apple.chronod/chronod/remoteArchives",
+              "read:/System/Library/Fonts",
+              "read:/Library/Fonts",
+              "net",
+              "sys:networkInterfaces",
+              "sys:homedir",
+              "read:~/Library/Preferences/com.apple.controlcenter.plist",
+              "sys:osRelease"
+            ]
+          },
+          "min_libbridgething_version": "0.12.1",
+          "changelog": "First release.\n\n- Shows your iPhone's Live Activities on the Car Thing, mirrored from your Mac through the bridgething desktop app.\n- Redraws each activity's lock-screen view natively from the data macOS receives, at the Car Thing's resolution.\n- Ticks timers and progress bars on the device, and rolls changed digits like iOS.\n- Comes to the front when an activity starts, or also when one updates, or never (setting), and returns to the\n  previous app when the last one ends."
+        }
+      ]
+    }
+  ],
+  "recommended_sources": []
+}
