@@ -78,7 +78,15 @@ function start(ctx: ExtensionContext) {
     const v = rendered.get(a.id)?.views;
     return !!(v?.listItem || v?.expanded) || Date.now() - (firstSeen.get(a.id) ?? Date.now()) >= ARCHIVE_GRACE_MS;
   };
-  const autoOpen = () => ctx.devices.some(d => d.connected && ctx.config(d).auto_open !== 'false');
+  // the manifest's bring_to_front choices; a device that never opened its settings has the default
+  const focusOn = (trigger: 'start' | 'update') =>
+    ctx.devices.some(d => {
+      if (!d.connected) return false;
+      const mode = ctx.config(d).bring_to_front ?? 'When one starts';
+      return mode === 'When one starts or updates' || (mode === 'When one starts' && trigger === 'start');
+    });
+  // ios rewrites archives without visible changes, so an update is a change in what the activity says
+  const lastTexts = new Map<string, string>();
 
   // views ride along only for activities that changed, so the heartbeat stays tiny
   const snapshot = (withViews: Set<string> | 'all') => {
@@ -144,7 +152,15 @@ function start(ctx: ExtensionContext) {
       shown = nowShown;
       for (const a of started) ctx.log.info(`+ ${a.appName}`);
       if (changed.size || removed) ctx.broadcast(snapshot(changed));
-      if (started.length && autoOpen()) tookOver = (await bringForward(ctx.webapp.id)) > 0 || tookOver;
+      const updated = nowShown.some(a => {
+        const said = rendered.get(a.id)!.texts.join('\n');
+        const before = lastTexts.get(a.id);
+        lastTexts.set(a.id, said);
+        return before !== undefined && before !== said;
+      });
+      for (const id of [...lastTexts.keys()]) if (!live.has(id)) lastTexts.delete(id);
+      const trigger = started.length ? 'start' : updated ? 'update' : null;
+      if (trigger && focusOn(trigger)) tookOver = (await bringForward(ctx.webapp.id)) > 0 || tookOver;
       if (ended && tookOver) (await restore(ctx.webapp.id), (tookOver = false));
     } catch (err) {
       setProblem(problemFromError(err));

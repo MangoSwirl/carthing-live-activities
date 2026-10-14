@@ -7,12 +7,17 @@
   "settings": "settings.html",
   "config": [
     {
-      "type": "boolean",
+      "type": "enum",
       "data": {
-        "key": "auto_open",
-        "label": "Open automatically",
-        "description": "Bring Live Activities to the front when a new activity starts, and go back to the previous app when the last one ends.",
-        "default": true
+        "key": "bring_to_front",
+        "label": "Bring Live Activities to the front",
+        "description": "When the Car Thing switches to this app on its own. It goes back to the previous app when the last activity ends.",
+        "choices": [
+          "When one starts",
+          "When one starts or updates",
+          "Never"
+        ],
+        "default": "When one starts"
       }
     }
   ],

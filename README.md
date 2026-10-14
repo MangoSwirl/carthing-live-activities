@@ -28,8 +28,8 @@ graphics at its own resolution, with the live parts still live.
   permission has to be granted to the desktop app itself.
 
 Install **Live Activities** from the bridgething store in the desktop app. When an activity starts on your iPhone, the
-Car Thing switches to it; when the last one ends, it goes back to what it was showing. Turn that off with the app's
-**Open automatically** setting.
+Car Thing switches to it; when the last one ends, it goes back to what it was showing. The app's **Bring Live Activities
+to the front** setting chooses when that happens: when one starts (the default), when one starts or updates, or never.
 
 ## What the extension can access
 
