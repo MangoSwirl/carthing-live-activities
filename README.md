@@ -10,11 +10,9 @@ and progress bars iOS keeps ticking. Control Center just plays that archive back
 the system's own store, decodes Apple's undocumented format, and hands them to the Car Thing, which draws them as vector
 graphics at its own resolution, with the live parts still live.
 
-![Two Live Activities on a Car Thing: a T3 Code agent run and a Focus Friend timer](docs/images/1-pair.png)
-
 <p>
-  <img src="docs/images/2-transit.png" width="49%" alt="A Transit trip with its dotted walking leg and progress bar" />
-  <img src="docs/images/3-focus.png" width="49%" alt="A Focus Friend countdown with its tinted card and live progress bar" />
+  <img src="docs/images/1-pair.png" width="49%" alt="A T3 Code agent run above a multi-leg Transit trip with walking dots, ride segments and a transfer" />
+  <img src="docs/images/2-focus.png" width="49%" alt="A Focus Friend countdown with its tinted card and live progress bar" />
 </p>
 
 ## Requirements
