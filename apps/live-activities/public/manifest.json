@@ -30,7 +30,9 @@
       "read:/Library/Fonts",
       "net",
       "sys:networkInterfaces",
-      "sys:homedir"
+      "sys:homedir",
+      "read:~/Library/Preferences/com.apple.controlcenter.plist",
+      "sys:osRelease"
     ],
     "api": 1
   }

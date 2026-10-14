@@ -19,7 +19,8 @@ type Activity = {
   views?: Views;
 };
 
-type Snapshot = { type: 'snapshot'; at: number; icons: Record<string, string>; activities: Activity[] };
+type Problem = { code: string; title: string; detail: string; steps: string[] };
+type Snapshot = { type: 'snapshot'; at: number; icons: Record<string, string>; activities: Activity[]; problem?: Problem | null };
 
 // the bridge heartbeats every 5s, so silence past this means the mac side is gone
 const STALE_LINK_MS = 12_000;
@@ -29,8 +30,12 @@ const STALE_LINK_MS = 12_000;
 // our backdrop is black, so those are the values used, for every app.
 const UNTINTED_GLASS = '#131313';
 const glass = (c: string) => `hsl(from ${c} h 100% 50%)`;
+// the knob overhangs the right edge of the 800px panel and hides x >= ~753 through the upper half of the screen,
+// so content is laid out in the visible width and the strip under the knob stays empty
 const SCREEN_W = 800;
+const KNOB_INSET = 47;
 const PAD = 24;
+const CONTENT_W = SCREEN_W - KNOB_INSET - PAD * 2;
 
 function since(ms: number | null, now: number): string {
   if (!ms) return '';
@@ -249,6 +254,7 @@ export default function App() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [icons, setIcons] = useState<Record<string, string>>({});
   const [lastSeen, setLastSeen] = useState(0);
+  const [problem, setProblem] = useState<Problem | null>(null);
   const [now, setNow] = useState(Date.now());
   const views = useRef(new Map<string, { rev: string; views: Views }>());
   const lastHello = useRef(0);
@@ -268,6 +274,7 @@ export default function App() {
       const msg = raw as Snapshot;
       if (msg?.type !== 'snapshot') return;
       setLastSeen(Date.now());
+      setProblem(msg.problem ?? null);
       if (msg.icons) setIcons(prev => ({ ...prev, ...msg.icons }));
       let missing = false;
       const merged = msg.activities.map(a => {
@@ -380,7 +387,8 @@ export default function App() {
               <div key={a.id} data-row data-phase={phase} className="la-row">
                 <div className="la-row-inner">
                   <div
-                    className={`flex flex-col gap-2.5 px-6 py-3 transition-opacity duration-500 ${stale ? 'opacity-50' : ''}`}
+                    style={{ paddingLeft: PAD, paddingRight: PAD + KNOB_INSET }}
+                    className={`flex flex-col gap-2.5 py-3 transition-opacity duration-500 ${stale ? 'opacity-50' : ''}`}
 >
                     <div className="flex items-center gap-2.5 px-1">
                       <Icon src={icons[a.bundleId]} name={a.appName} size={26} />
@@ -390,7 +398,7 @@ export default function App() {
                         {since(a.updatedAt ?? a.startedAt, now)}
                       </span>
                     </div>
-                    <Card a={a} width={SCREEN_W - PAD * 2} maxH={380} />
+                    <Card a={a} width={CONTENT_W} maxH={380} />
                   </div>
                 </div>
               </div>
@@ -399,15 +407,35 @@ export default function App() {
         </div>
       </div>
       <div
+        style={{ paddingRight: KNOB_INSET }}
         className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-500 ${empty ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="font-display text-screen-title font-medium text-soft">No Live Activities</div>
-        <div className="max-w-[560px] text-center font-mono text-hint leading-relaxed text-dim">
-          {conn !== 'open'
-            ? conn
-            : linked
-              ? 'they show up here as soon as your iPhone starts one'
-              : 'needs the bridgething desktop app on a Mac running macOS 26, with full disk access and this app installed there'}
-        </div>
+        {linked && problem ? (
+          <div className="flex max-w-[600px] flex-col gap-4 px-8">
+            <div className="font-display text-screen-title leading-tight font-medium">{problem.title}</div>
+            <div className="text-row text-soft">{problem.detail}</div>
+            <ol className="flex flex-col gap-2">
+              {problem.steps.map((step, i) => (
+                <li key={i} className="flex gap-3 text-row text-near">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-neutral-soft font-mono text-hint">
+                    {i + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : (
+          <>
+            <div className="font-display text-screen-title font-medium text-soft">No Live Activities</div>
+            <div className="max-w-[560px] text-center font-mono text-hint leading-relaxed text-dim">
+              {conn !== 'open'
+                ? conn
+                : linked
+                  ? 'they show up here as soon as your iPhone starts one'
+                  : 'needs the bridgething desktop app on a Mac running macOS 26, with full disk access and this app installed there'}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -36,10 +36,27 @@ The store lists these permissions before you install:
 | `read:~/Library/Group Containers/group.com.apple.chronod/chronod/remoteArchives` | the views your iPhone rendered for each activity |
 | `read:/System/Library/Fonts`, `read:/Library/Fonts` | system glyphs an archive references but does not embed |
 | `net` | App Store icon lookup, and reaching the Car Thing over USB to bring the app forward |
-| `sys:homedir`, `sys:networkInterfaces` | finding your home folder and the Car Thing's USB link |
+| `read:~/Library/Preferences/com.apple.controlcenter.plist` | checking that iPhone Live Activities are turned on, to explain it if not |
+| `sys:homedir`, `sys:networkInterfaces`, `sys:osRelease` | finding your home folder, the Car Thing's USB link, and the macOS version |
 
 It only reads; it never writes to those folders, and nothing leaves your Mac except to your Car Thing and the
 App Store icon lookup.
+
+## Troubleshooting
+
+When something in the setup is missing, the Car Thing says what and how to fix it, and the desktop app's log has the
+same message. The checks run every 10 seconds, so fixes take effect without reinstalling.
+
+| The Car Thing says | Fix |
+| --- | --- |
+| Live Activities needs a Mac | Run the bridgething desktop app on a Mac; Windows and Linux never receive iPhone Live Activities. |
+| This Mac needs macOS 26 | Update the Mac. iPhone Live Activities on the Mac started with macOS 26 Tahoe. |
+| Give bridgething Full Disk Access | System Settings > Privacy & Security > Full Disk Access, turn on bridgething, then reopen it. |
+| Live Activities is missing a permission | Reinstall the app in the desktop app and approve its permissions. |
+| iPhone Live Activities are off on this Mac | Search System Settings for "Live Activities" and turn on Live Activities from iPhone. |
+| No iPhone is connected to this Mac | Sign in to the same Apple Account on both, iPhone on iOS 26, Bluetooth and Wi-Fi on. |
+| Waiting for a first Live Activity | Start one on the iPhone; once it shows in the Mac menu bar it shows here. |
+| needs the bridgething desktop app on a Mac ... | The Car Thing hears nothing from a Mac: open the desktop app, check this app is installed and enabled there. |
 
 ## How it works
 

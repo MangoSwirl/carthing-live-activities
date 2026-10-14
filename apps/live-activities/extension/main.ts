@@ -5,6 +5,7 @@
 import { asJson, defineExtension, json, type Device, type ExtensionContext } from '@bridgething/extension';
 
 import { readArchive, renderView } from './archive/decode';
+import { diagnose, problemFromError, type Problem } from './diagnose';
 import { readActivities, watchActivities, type MirroredActivity } from './source';
 import { bringForward, restore } from './switcher';
 
@@ -22,6 +23,7 @@ type Rendered = { rev: string; views: Partial<Record<ViewKey, View>>; texts: str
 // liveactivitiesd's row lands a second or two before chronod's archive; wait this long before falling back to text
 const ARCHIVE_GRACE_MS = 8000;
 const HEARTBEAT_MS = 5000;
+const RECHECK_MS = 10_000;
 
 const revOf = (a: MirroredActivity) => `${a.archivePath}:${a.archiveMtime}:${a.updatedAt}`;
 
@@ -62,6 +64,15 @@ function start(ctx: ExtensionContext) {
   const rendered = new Map<string, Rendered>();
   const firstSeen = new Map<string, number>();
   let tookOver = false;
+  let problem: Problem | null = null;
+
+  const setProblem = (next: Problem | null) => {
+    if (next?.code === problem?.code) return;
+    problem = next;
+    if (next) ctx.log.error(`${next.title}. ${next.detail} ${next.steps.join('; ')}.`);
+    else ctx.log.info('live activity stores are readable');
+    ctx.broadcast(snapshot('all'));
+  };
 
   const ready = (a: MirroredActivity) => {
     const v = rendered.get(a.id)?.views;
@@ -75,6 +86,7 @@ function start(ctx: ExtensionContext) {
     return json({
       type: 'snapshot',
       at: Date.now(),
+      problem,
       icons: Object.fromEntries(
         shown.filter(a => full(a.id) && icons.get(a.bundleId)).map(a => [a.bundleId, icons.get(a.bundleId)!]),
       ),
@@ -104,6 +116,7 @@ function start(ctx: ExtensionContext) {
     running = true;
     try {
       const next = readActivities();
+      if (problem) setProblem(null);
       const before = new Set(shown.map(a => a.id));
       const changed = new Set<string>();
       for (const a of next) {
@@ -134,7 +147,7 @@ function start(ctx: ExtensionContext) {
       if (started.length && autoOpen()) tookOver = (await bringForward(ctx.webapp.id)) > 0 || tookOver;
       if (ended && tookOver) (await restore(ctx.webapp.id), (tookOver = false));
     } catch (err) {
-      ctx.log.error(`cannot read live activities; is full disk access granted? ${(err as Error).message}`);
+      setProblem(problemFromError(err));
     } finally {
       running = false;
       if (again) (again = false), void refresh();
@@ -149,16 +162,32 @@ function start(ctx: ExtensionContext) {
     if (asJson<{ type?: string }>(message)?.type === 'hello') sendAll(device);
   });
 
-  if (typeof process !== 'undefined' && process.platform !== 'darwin') {
-    ctx.log.warn('live activities are only mirrored on macOS');
-    return () => {};
-  }
-  const stopWatching = watchActivities(() => void refresh());
   const heartbeat = setInterval(() => ctx.broadcast(snapshot(new Set())), HEARTBEAT_MS);
-  void refresh();
+  let stopWatching: (() => void) | undefined;
+  // watching needs the stores to be readable; keep checking until they are, so granting access needs no restart
+  const tryStart = () => {
+    let found: Problem | null;
+    try {
+      found = diagnose();
+    } catch (err) {
+      found = problemFromError(err);
+    }
+    if (found && found.code !== 'never-synced') return setProblem(found);
+    setProblem(found);
+    if (stopWatching) return void refresh();
+    try {
+      stopWatching = watchActivities(() => void refresh());
+    } catch (err) {
+      return setProblem(problemFromError(err));
+    }
+    void refresh();
+  };
+  tryStart();
+  const recheck = setInterval(() => (problem || !stopWatching) && tryStart(), RECHECK_MS);
   return () => {
-    stopWatching();
+    stopWatching?.();
     clearInterval(heartbeat);
+    clearInterval(recheck);
   };
 }
 
