@@ -6,6 +6,13 @@ and redrawn natively: timers tick, progress bars move, and changed digits roll t
 It works through your Mac. macOS 26 mirrors your iPhone's Live Activities into the menu bar; this app reads the same
 data macOS receives and sends it to the Car Thing. Nothing is screenshotted or OCR'd.
 
+![Two Live Activities on a Car Thing: a T3 Code agent run and a Focus Friend timer](docs/images/1-pair.png)
+
+<p>
+  <img src="docs/images/2-transit.png" width="49%" alt="A Transit trip with its dotted walking leg and progress bar" />
+  <img src="docs/images/3-focus.png" width="49%" alt="A Focus Friend countdown with its tinted card and live progress bar" />
+</p>
+
 ## Requirements
 
 - A Mac on macOS 26 or later, signed in to the same Apple Account as your iPhone, with iPhone Live Activities showing in
@@ -72,6 +79,9 @@ The terminal you develop from needs Full Disk Access, since the dev loop runs th
 
 The display list field numbers were worked out with help from [OpenSwiftUI](https://github.com/OpenSwiftUIProject/OpenSwiftUI)'s
 reimplementation of SwiftUI's protobuf encodings.
+
+The device frame in `docs/images/` comes from the [bridgething](https://github.com/JoeyEamigh/bridgething) website
+(MIT, Joey Eamigh).
 
 ## License
 
