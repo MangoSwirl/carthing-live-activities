@@ -3,8 +3,12 @@
 Shows your iPhone's Live Activities on a Spotify Car Thing running [bridgething](https://bridgething.com), full screen
 and redrawn natively: timers tick, progress bars move, and changed digits roll the way they do on iOS.
 
-It works through your Mac. macOS 26 mirrors your iPhone's Live Activities into the menu bar; this app reads the same
-data macOS receives and sends it to the Car Thing. Nothing is screenshotted or OCR'd.
+It works through your Mac, and nothing is screenshotted or OCR'd. macOS 26 mirrors your iPhone's Live Activities into
+the menu bar, and the iPhone does the rendering: it runs each app's widget code and sends the Mac a finished SwiftUI
+view, serialized as a display list of shapes, glyph runs, images, embedded font subsets, and the timers and progress
+bars iOS keeps ticking. Control Center just plays that archive back. This app reads the same archives from the system's
+own store, decodes Apple's undocumented format, and redraws each view as vector SVG on the Car Thing, at the Car Thing's
+resolution and with the live parts still live.
 
 ![Two Live Activities on a Car Thing: a T3 Code agent run and a Focus Friend timer](docs/images/1-pair.png)
 
