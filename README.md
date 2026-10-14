@@ -11,8 +11,8 @@ the system's own store, decodes Apple's undocumented format, and hands them to t
 graphics at its own resolution, with the live parts still live.
 
 <p>
-  <img src="docs/images/1-pair.png" width="49%" alt="A T3 Code agent run above a multi-leg Transit trip with walking dots, ride segments and a transfer" />
-  <img src="docs/images/2-focus.png" width="49%" alt="A Focus Friend countdown with its tinted card and live progress bar" />
+  <img src="docs/images/1-pair.png" width="49%" alt="A T3 Code agent run above a Focus Friend countdown with its tinted card and live progress bar" />
+  <img src="docs/images/2-transit.png" width="49%" alt="A multi-leg Transit trip with walking dots, ride segments and a transfer" />
 </p>
 
 ## Requirements
