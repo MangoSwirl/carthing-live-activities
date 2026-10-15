@@ -5,6 +5,7 @@
 import { asJson, defineExtension, json, type Device, type ExtensionContext } from '@bridgething/extension';
 
 import { readArchive, renderView } from './archive/decode';
+import { makeGapLog } from './gaps';
 import { diagnose, problemFromError, type Problem } from './diagnose';
 import { readActivities, watchActivities, type MirroredActivity } from './source';
 import { bringForward, restore } from './switcher';
@@ -27,7 +28,10 @@ const RECHECK_MS = 10_000;
 
 const revOf = (a: MirroredActivity) => `${a.archivePath}:${a.archiveMtime}:${a.updatedAt}`;
 
-async function render(a: MirroredActivity): Promise<Rendered> {
+type Gap = ReturnType<typeof makeGapLog>;
+type GapReport = { warnings?: string[]; unknowns?: { code: string; detail?: string }[] };
+
+async function render(a: MirroredActivity, gap?: Gap): Promise<Rendered> {
   const out: Rendered = { rev: revOf(a), views: {}, texts: [] };
   if (!a.archivePath) return out;
   const { readFile } = await import('node:fs/promises');
@@ -35,6 +39,11 @@ async function render(a: MirroredActivity): Promise<Rendered> {
   for (const [key, viewTag] of Object.entries(VIEW_TAGS) as [ViewKey, string][]) {
     const v = renderView(archive, { viewTag, colorScheme: 'dark', luminanceReduced: false, redaction: 0 });
     if (!v) continue;
+    gap?.(
+      { warnings: v.warnings, unknowns: [...((archive as unknown as GapReport).unknowns ?? []), ...((v as unknown as GapReport).unknowns ?? [])] },
+      a.archivePath,
+      `${a.appName} ${key}`,
+    );
     out.views[key] = { svg: v.svg, width: v.width, height: v.height, cornerRadius: v.cornerRadius, tint: v.backgroundTint ?? null };
     if (key === 'listItem' || !out.texts.length) out.texts = v.texts;
   }
@@ -65,6 +74,7 @@ function start(ctx: ExtensionContext) {
   const firstSeen = new Map<string, number>();
   let tookOver = false;
   let problem: Problem | null = null;
+  const gap = makeGapLog(ctx.dataDir, msg => ctx.log.warn(msg));
 
   const setProblem = (next: Problem | null) => {
     if (next?.code === problem?.code) return;
@@ -134,7 +144,7 @@ function start(ctx: ExtensionContext) {
         }
         if (rendered.get(a.id)?.rev === revOf(a)) continue;
         try {
-          rendered.set(a.id, await render(a));
+          rendered.set(a.id, await render(a, gap));
         } catch (err) {
           ctx.log.warn(`could not decode ${a.appName}'s archive: ${(err as Error).message}`);
           rendered.set(a.id, { rev: revOf(a), views: {}, texts: [] });

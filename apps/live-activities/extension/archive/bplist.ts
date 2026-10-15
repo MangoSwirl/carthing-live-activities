@@ -1,12 +1,18 @@
 // minimal bplist00 reader; widget archives store their data attachment this way
 
-export type Plist = null | boolean | number | string | Uint8Array | Date | Plist[] | { [k: string]: Plist };
+export type Uid = { uid: number };
+export type Plist = null | boolean | number | string | Uint8Array | Date | Uid | Plist[] | { [k: string]: Plist };
+// what callers get without the uids option: uids come back as plain integers
+export type PlainPlist = null | boolean | number | string | Uint8Array | Date | PlainPlist[] | { [k: string]: PlainPlist };
 
 export function isBplist(b: Uint8Array): boolean {
   return b.length > 40 && new TextDecoder().decode(b.subarray(0, 8)) === 'bplist00';
 }
 
-export function parseBplist(b: Uint8Array): Plist {
+// keyed archives need uid references kept apart from plain integers
+export function parseBplist(b: Uint8Array, opts?: { uids?: false }): PlainPlist;
+export function parseBplist(b: Uint8Array, opts: { uids: boolean }): Plist;
+export function parseBplist(b: Uint8Array, opts: { uids?: boolean } = {}): Plist {
   const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
   const t = b.length - 32;
   const offSize = b[t + 6]!;
@@ -70,7 +76,7 @@ export function parseBplist(b: Uint8Array): Plist {
         return out;
       }
       case 0x8:
-        return uint(at + 1, (m & 0xf) + 1);
+        return opts.uids ? { uid: uint(at + 1, (m & 0xf) + 1) } : uint(at + 1, (m & 0xf) + 1);
       case 0xa: {
         const [n, s] = len(at);
         return Array.from({ length: n }, (_, i) => read(uint(s + i * refSize, refSize)));

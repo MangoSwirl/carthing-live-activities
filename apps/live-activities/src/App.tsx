@@ -24,12 +24,14 @@ type Snapshot = { type: 'snapshot'; at: number; icons: Record<string, string>; a
 
 // the bridge heartbeats every 5s, so silence past this means the mac side is gone
 const STALE_LINK_MS = 12_000;
-// ios draws lock-screen activities as glass over the wallpaper. measured on solid black/grey/white/blue wallpapers
-// (screenshots converted from display p3 to srgb): a tinted card keeps the stored tint's hue at full brightness and
-// its saturation rises as the backdrop darkens, reaching 1 over black; an untinted card over black is #131313.
-// our backdrop is black, so those are the values used, for every app.
+// ios draws lock-screen activities as glass over the wallpaper, and over a dark wallpaper it keeps the stored tint's
+// hue and saturation but roughly halves its lightness: focus friend's cream (s .88, l .90) shows as orange (s 1, l .5),
+// termius' navy (s .27, l .16) as (s .27, l .085), transit's pink (s 1, l .42) as maroon (l .19). measured from
+// lock-screen screenshots over black (converted from display p3 to srgb); the tint's own opacity doesn't show. our
+// backdrop is black, so that's the rule, for every app. an untinted card over black is #131313.
 const UNTINTED_GLASS = '#131313';
-const glass = (c: string) => `hsl(from ${c} h 100% 50%)`;
+// the tint goes in unclamped (wide-gamut tints like transit's have components outside 0..1), so its lightness is right
+const glass = ([r, g, b]: number[]) => `hsl(from color(srgb ${r} ${g} ${b}) h min(calc(s * 1.13), 100) calc(l * 0.55))`;
 // the knob overhangs the right edge of the 800px panel and hides x >= ~753 through the upper half of the screen,
 // so content is laid out in the visible width and the strip under the knob stays empty
 const SCREEN_W = 800;
@@ -43,12 +45,6 @@ function since(ms: number | null, now: number): string {
   if (m < 1) return 'just now';
   if (m < 60) return `${m}m ago`;
   return `${Math.floor(m / 60)}h ${m % 60}m ago`;
-}
-
-function rgba(c: number[] | null | undefined, fallback: string): string {
-  if (!c || c.length < 4 || c[3] === 0) return fallback;
-  const [r, g, b, a] = c.map(v => (v <= 1 ? v : v / 255));
-  return `rgba(${Math.round(r! * 255)},${Math.round(g! * 255)},${Math.round(b! * 255)},${a})`;
 }
 
 function Icon({ src, name, size }: { src?: string; name: string; size: number }) {
@@ -83,6 +79,14 @@ function tick(root: ParentNode, now: number) {
   root.querySelectorAll<SVGTextElement>('text[data-la-timer-end]').forEach(el => {
     const text = timerText(el, now);
     if (el.textContent !== text) el.textContent = text;
+  });
+  // clock hands: swiftui's clock-hand rotation effect turns its content with wall-clock time
+  root.querySelectorAll<SVGGElement>('[data-la-rotate-period]').forEach(el => {
+    const period = Number(el.dataset.laRotatePeriod) * 1000;
+    const epoch = Number(el.dataset.laRotateEpoch);
+    if (!period) return;
+    const deg = ((((now - epoch) / period) % 1) + 1) % 1 * 360;
+    el.setAttribute('transform', `rotate(${deg.toFixed(3)} ${el.dataset.laRotateCx ?? 0} ${el.dataset.laRotateCy ?? 0})`);
   });
   root.querySelectorAll<SVGRectElement>('[data-la-progress-end]').forEach(el => {
     const start = Number(el.dataset.laProgressStart);
@@ -198,7 +202,7 @@ function Card({ a, width, maxH }: { a: Activity; width: number; maxH: number }) 
         width: view.width * scale,
         height: view.height * scale,
         borderRadius: (view.cornerRadius ?? 20) * scale,
-        background: tinted ? glass(rgba(view.tint, '')) : UNTINTED_GLASS,
+        background: tinted ? glass(view.tint!) : UNTINTED_GLASS,
       }}>
       <Svg svg={view.svg} className="h-full w-full" />
     </div>

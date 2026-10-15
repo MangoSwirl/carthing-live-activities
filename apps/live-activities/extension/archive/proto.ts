@@ -9,8 +9,24 @@ export type Field = {
 
 export class Msg {
   readonly fields: Field[];
+  // field numbers some accessor touched; checkUnread reports the rest
+  private readonly touched = new Set<number>();
   constructor(readonly bytes: Uint8Array) {
     this.fields = parseFields(bytes);
+  }
+  // the first field (oneof-style messages carry their case as the only field)
+  first(): Field | undefined {
+    const f = this.fields[0];
+    if (f) this.touched.add(f.no);
+    return f;
+  }
+  // fields we know about and deliberately do not use
+  ignore(...nos: number[]): this {
+    for (const n of nos) this.touched.add(n);
+    return this;
+  }
+  unread(): Field[] {
+    return this.fields.filter((f) => !this.touched.has(f.no));
   }
   // lenient sub-message: wrong wire type or garbage yields an empty message
   static from(f: Field | undefined): Msg {
@@ -22,9 +38,11 @@ export class Msg {
     }
   }
   all(no: number): Field[] {
+    this.touched.add(no);
     return this.fields.filter((f) => f.no === no);
   }
   get(no: number): Field | undefined {
+    this.touched.add(no);
     for (let i = this.fields.length - 1; i >= 0; i--) if (this.fields[i]!.no === no) return this.fields[i];
     return undefined;
   }
@@ -108,6 +126,61 @@ export function parseFields(b: Uint8Array): Field[] {
 }
 
 const EMPTY = new Uint8Array(0);
+
+// ---------------------------------------------------------------- unknown data, collected per decode
+
+export type Unknown = { code: string; detail?: string; count: number };
+
+export class Unknowns {
+  private map = new Map<string, Unknown>();
+  add(code: string, detail?: string, count = 1) {
+    const u = this.map.get(code);
+    if (u) u.count += count;
+    else this.map.set(code, { code, detail, count });
+  }
+  merge(list: Unknown[]) {
+    for (const u of list) this.add(u.code, u.detail, u.count);
+  }
+  list(): Unknown[] {
+    return [...this.map.values()].sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+  }
+}
+
+let sink: Unknowns | undefined;
+
+// runs fn with every unknown reported into u
+export function collecting<T>(u: Unknowns, fn: () => T): T {
+  const prev = sink;
+  sink = u;
+  try {
+    return fn();
+  } finally {
+    sink = prev;
+  }
+}
+
+export function unknown(code: string, detail?: string) {
+  sink?.add(code, detail);
+}
+
+// replays unknowns collected earlier (e.g. while decoding a cached chunk) into the current collector
+export function reportAll(list: Unknown[]) {
+  sink?.merge(list);
+}
+
+// reports fields present in m that no accessor read, as unread:<role>.<field>
+export function checkUnread(m: Msg | undefined, role: string) {
+  if (!m || !sink) return;
+  for (const f of m.unread()) sink.add(`unread:${role}.${f.no}`, preview(f));
+}
+
+export function preview(f: Field): string {
+  if (f.wt === 0) return `varint ${f.v}`;
+  if (f.wt === 5) return `f32 ${+new DataView(f.raw.buffer, f.raw.byteOffset, 4).getFloat32(0, true).toFixed(4)}`;
+  if (f.wt === 1) return `f64/fixed64 ${hex(f.raw)}`;
+  const text = f.raw.length && f.raw.every((c) => c >= 32 && c < 127);
+  return text ? `"${new TextDecoder().decode(f.raw.subarray(0, 32))}"` : `bytes[${f.raw.length}] ${hex(f.raw.subarray(0, 12))}`;
+}
 const EMPTY_MSG = new Msg(EMPTY);
 
 function looksLikeMsg(b: Uint8Array): boolean {
