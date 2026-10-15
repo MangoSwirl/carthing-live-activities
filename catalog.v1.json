@@ -1,7 +1,7 @@
 {
   "$schema": "https://apps.bridgething.com/schemas/catalog/v1.json",
   "schema": "catalog.v1",
-  "updated_at": "2026-10-14T08:21:44.577Z",
+  "updated_at": "2026-10-15T20:44:40.341Z",
   "repo": {
     "name": "carthing-live-activities",
     "description": "Mirror your iPhone's Live Activities onto a BridgeThing Car Thing.",
@@ -22,6 +22,37 @@
       "homepage": "https://github.com/MangoSwirl/carthing-live-activities",
       "source": "https://github.com/MangoSwirl/carthing-live-activities",
       "versions": [
+        {
+          "version": "1.0.1",
+          "released_at": "2026-10-15T20:44:40.338Z",
+          "download": {
+            "url": "https://mangoswirl.github.io/carthing-live-activities/r/01a138a4-aa9f-7782-a3f7-afd8d8315156/1.0.1.zip",
+            "size": 970720,
+            "sha256": "dab0882a9059ba125fdcda3524805225d0d2e2ed47262bacc83ec086a77e1d38"
+          },
+          "settings": {
+            "url": "https://mangoswirl.github.io/carthing-live-activities/s/01a138a4-aa9f-7782-a3f7-afd8d8315156/1.0.1.html",
+            "size": 26933,
+            "sha256": "4e28f4d6d83e8fb0831de0908089bcd5bcb070786fa41f5907827d753d77beb8"
+          },
+          "permissions": [],
+          "extension": {
+            "desktop": true,
+            "permissions": [
+              "read:~/Library/Group Containers/group.com.apple.liveactivitiesd",
+              "read:~/Library/Group Containers/group.com.apple.chronod/chronod/remoteArchives",
+              "read:/System/Library/Fonts",
+              "read:/Library/Fonts",
+              "net",
+              "sys:networkInterfaces",
+              "sys:homedir",
+              "read:~/Library/Preferences/com.apple.controlcenter.plist",
+              "sys:osRelease"
+            ]
+          },
+          "min_libbridgething_version": "0.12.1",
+          "changelog": "- Tinted activities keep their tint's saturation, so dark tints like Termius' stay dark instead of turning bright blue.\n- Buttons and images no longer show up dimmed, as if pressed.\n- Text wraps, truncates, aligns and spaces like it does on the phone, using the app's own fonts where it ships them.\n- Frosted materials, inner shadows and angular gradients draw properly."
+        },
         {
           "version": "1.0.0",
           "released_at": "2026-10-14T08:21:44.566Z",
